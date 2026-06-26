@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAS MTEC Course Planner – Class of 2026–2028</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1a202c;font-size:14px}
+a{color:#3182ce;text-decoration:none}
+a:hover{text-decoration:underline}
+
+header{background:linear-gradient(135deg,#1a365d,#2c5282);color:white;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+header h1{font-size:1.2rem;font-weight:700;letter-spacing:-0.01em}
+header p{font-size:0.78rem;opacity:0.8;margin-top:2px}
+.header-note{font-size:0.72rem;background:rgba(255,255,255,0.15);padding:5px 10px;border-radius:6px;max-width:340px;line-height:1.4}
+
+.app{display:flex;height:calc(100vh - 80px)}
+.sidebar{width:270px;background:white;border-right:1px solid #e2e8f0;padding:16px;overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;gap:14px}
+.main{flex:1;overflow-y:auto;padding:16px}
+
+/* Sidebar sections */
+.sidebar-section h3{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#718096;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #e2e8f0}
+
+.cp-box{background:#ebf4ff;border-radius:8px;padding:12px;text-align:center}
+.cp-big{font-size:2rem;font-weight:800;color:#2b6cb0;line-height:1}
+.cp-label{font-size:0.72rem;color:#4a5568;margin-top:2px}
+.cp-bar-wrap{background:#bee3f8;border-radius:4px;height:8px;margin-top:8px;overflow:hidden}
+.cp-bar-fill{height:100%;background:#3182ce;border-radius:4px;transition:width .3s}
+.cp-hint{font-size:0.68rem;color:#718096;margin-top:5px}
+
+.area-list{display:flex;flex-direction:column;gap:5px}
+.area-row{display:flex;align-items:center;gap:7px;cursor:default}
+.area-indicator{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.area-text{font-size:0.72rem;color:#4a5568;flex:1;line-height:1.3}
+.area-count{font-size:0.7rem;font-weight:600;min-width:32px;text-align:right}
+.area-count.met{color:#38a169}
+.area-count.unmet{color:#a0aec0}
+.req-msg{font-size:0.7rem;padding:6px 8px;border-radius:4px;line-height:1.4}
+.req-ok{background:#f0fff4;color:#276749}
+.req-warn{background:#fffbeb;color:#744210}
+
+.selected-items{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto}
+.sel-item{display:flex;justify-content:space-between;align-items:flex-start;background:#f7fafc;border-radius:5px;padding:6px 8px;gap:6px}
+.sel-name{font-size:0.72rem;color:#2d3748;flex:1;line-height:1.35}
+.sel-right{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.sel-cp{background:#3182ce;color:white;border-radius:3px;padding:1px 5px;font-size:0.68rem;font-weight:600}
+.sel-remove{background:none;border:none;cursor:pointer;color:#cbd5e0;font-size:0.9rem;line-height:1;padding:0 2px;font-weight:700}
+.sel-remove:hover{color:#fc8181}
+.empty-msg{font-size:0.72rem;color:#a0aec0;font-style:italic;text-align:center;padding:10px 0}
+.sel-total{font-size:0.72rem;color:#4a5568;padding-top:6px;border-top:1px solid #e2e8f0;text-align:right}
+
+.export-btn{width:100%;padding:8px;background:linear-gradient(135deg,#2b6cb0,#3182ce);color:white;border:none;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;margin-top:4px;letter-spacing:0.01em;transition:opacity .15s}
+.export-btn:hover{opacity:0.88}
+.export-btn:disabled{opacity:0.4;cursor:default}
+
+/* Filter bar */
+.filter-bar{position:sticky;top:0;background:#f0f4f8;z-index:20;padding-bottom:12px}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+.filter-label{font-size:0.72rem;color:#718096;font-weight:600;white-space:nowrap}
+.fb{padding:4px 11px;border:1.5px solid #cbd5e0;border-radius:20px;font-size:0.78rem;cursor:pointer;background:white;color:#4a5568;transition:all .15s;white-space:nowrap}
+.fb:hover{border-color:#3182ce;color:#3182ce}
+.fb.on{background:#3182ce;color:white;border-color:#3182ce}
+.fb.sem1{background:#2c7a7b;color:white;border-color:#2c7a7b}
+.fb.sem2{background:#6b46c1;color:white;border-color:#6b46c1}
+.fb.sem3{background:#c05621;color:white;border-color:#c05621}
+.fb.sem12{background:#285e61;color:white;border-color:#285e61}
+.search-input{padding:7px 12px;border:1.5px solid #cbd5e0;border-radius:6px;font-size:0.8rem;width:100%;outline:none;background:white}
+.search-input:focus{border-color:#3182ce}
+.results-count{font-size:0.72rem;color:#718096;margin-bottom:8px}
+
+/* Course groups */
+.course-section{margin-bottom:20px}
+.section-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid}
+.section-head-title{font-size:0.85rem;font-weight:700;color:#2d3748}
+.section-head-meta{font-size:0.72rem;color:#718096}
+
+.area-group{margin-bottom:14px}
+.area-head{font-size:0.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:0.05em;padding:5px 10px;border-left:3px solid;border-radius:0 4px 4px 0;margin-bottom:8px}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.card{background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:12px;cursor:pointer;transition:all .15s;position:relative}
+.card:hover{border-color:#90cdf4;box-shadow:0 2px 10px rgba(0,0,0,0.07);transform:translateY(-1px)}
+.card.selected{border-color:#3182ce;background:#ebf4ff}
+.card.selected .check-box{background:#3182ce;border-color:#3182ce}
+.card.selected .check-box::after{content:'✓';color:white;font-size:0.65rem;font-weight:900}
+.check-box{width:16px;height:16px;border:2px solid #cbd5e0;border-radius:3px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+
+.card-header{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.card-title{font-size:0.82rem;font-weight:600;color:#2d3748;line-height:1.4;flex:1}
+.card-id{font-size:0.68rem;color:#a0aec0;margin-bottom:6px}
+
+.badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:7px}
+.badge{padding:2px 7px;border-radius:10px;font-size:0.68rem;font-weight:600;white-space:nowrap}
+.b-cp{background:#ebf4ff;color:#2b6cb0}
+.b-sem1{background:#e6fffa;color:#234e52}
+.b-sem2{background:#faf5ff;color:#553c9a}
+.b-sem3{background:#fff7ed;color:#7c2d12}
+.b-sem12{background:#e6fffa;color:#285e61}
+.b-prereq{background:#fffbeb;color:#7b341e}
+.b-masonly{background:#f0fff4;color:#22543d}
+.b-block{background:#faf5ff;color:#553c9a}
+
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid #f0f4f8}
+.card-lecturer{font-size:0.68rem;color:#a0aec0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-link-btn{font-size:0.68rem;color:#3182ce;flex-shrink:0;margin-left:6px;background:none;border:1px solid #bee3f8;border-radius:4px;padding:2px 6px;cursor:pointer;transition:all .15s}
+.card-link-btn:hover{background:#ebf4ff;border-color:#3182ce}
+.copy-id{cursor:pointer;color:#a0aec0;font-size:0.8rem;transition:color .15s}
+.copy-id:hover{color:#3182ce}
+.toast{position:fixed;bottom:20px;right:20px;background:#2d3748;color:white;padding:8px 14px;border-radius:6px;font-size:0.78rem;z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* Course detail panel */
+.card-abstract{font-size:0.71rem;color:#4a5568;line-height:1.45;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-details{margin-top:6px;padding-top:6px;border-top:1px dashed #e2e8f0;display:grid;grid-template-columns:1fr 1fr;gap:3px 10px}
+.detail-row{display:flex;align-items:flex-start;gap:4px;font-size:0.68rem;line-height:1.4}
+.detail-icon{flex-shrink:0;opacity:0.6;width:12px;text-align:center}
+.detail-val{color:#4a5568;flex:1}
+.detail-val.highlight{color:#c05621;font-weight:600}
+.detail-tag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:0.65rem;font-weight:600}
+.tag-graded{background:#ebf4ff;color:#2b6cb0}
+.tag-ungraded{background:#f0fff4;color:#276749}
+.tag-written{background:#fffbeb;color:#7b341e}
+.tag-recorded{background:#e6fffa;color:#234e52}
+.tag-not-recorded{background:#fff5f5;color:#c53030}
+.detail-full{grid-column:1/-1}
+
+/* Section color themes */
+.core-theme{border-color:#3182ce}
+.core-theme .section-head{border-color:#3182ce}
+.skill-theme{border-color:#38a169}
+.skill-theme .section-head{border-color:#38a169}
+.maselec-theme{border-color:#805ad5}
+.maselec-theme .section-head{border-color:#805ad5}
+.furtherelec-theme{border-color:#dd6b20}
+.furtherelec-theme .section-head{border-color:#dd6b20}
+
+/* Area colors */
+.area-gm{border-color:#3182ce}
+.area-sm{border-color:#38a169}
+.area-io{border-color:#dd6b20}
+.area-qq{border-color:#805ad5}
+.area-mm{border-color:#d53f8c}
+.area-fm{border-color:#d69e2e}
+
+.no-results{text-align:center;padding:40px;color:#a0aec0;font-size:0.85rem}
+
+/* Semester badge colors */
+.sem-s1{color:#234e52;font-weight:600}
+.sem-s2{color:#553c9a;font-weight:600}
+.sem-s3{color:#7c2d12;font-weight:600}
+
+/* Info tooltip */
+.tip{font-size:0.7rem;color:#718096;background:#f7fafc;border-radius:5px;padding:8px;line-height:1.5;margin-top:4px}
+.tip strong{color:#4a5568}
+
+@media(max-width:700px){.app{flex-direction:column}.sidebar{width:100%;max-height:300px}.main{flex:1}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>MAS MTEC Course Planner</h1>
+    <p>Class of 2026–2028 · ETH Zurich · Autumn Semester 2026 starts 15 Sep 2026</p>
+  </div>
+  <div class="header-note">
+    ⚠️ <strong>Preliminary.</strong> Study plan Version Jun 2026. Click <strong>VVZ ↗</strong> on any card to open the official ETH course page directly. Always confirm details in the
+    <a href="https://www.vvz.ethz.ch/Vorlesungsverzeichnis/sucheLehrangebot.view?seite=0&semkez=2026W&studiengangAbschnittId=122807&ansicht=1&lang=en" target="_blank" style="color:#90cdf4">MAS MTEC Course Catalogue</a> before registering.
+  </div>
+</header>
+
+<div class="toast" id="toast"></div>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <div class="sidebar-section">
+      <h3>My CP Tracker</h3>
+      <div class="cp-box">
+        <div class="cp-big" id="totalCP">0</div>
+        <div class="cp-label">Credit Points Selected (this semester)</div>
+        <div class="cp-bar-wrap"><div class="cp-bar-fill" id="cpBar" style="width:0%"></div></div>
+        <div class="cp-hint">Aim for ~12–15 CP / semester. Min 48 CP in courses + 12 CP thesis to graduate.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Competence Area Coverage</h3>
+      <div class="area-list" id="areaList"></div>
+      <div class="tip" style="margin-top:8px">
+        <strong>Requirement:</strong> ≥3 CP in at least 5 of 6 areas (across all semesters)
+      </div>
+      <div class="req-msg" id="reqMsg" style="margin-top:6px"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Selected Courses</h3>
+      <div class="selected-items" id="selectedList"><div class="empty-msg">Click a course card to add it.</div></div>
+      <div class="sel-total" id="selTotal" style="display:none"></div>
+      <button class="export-btn" id="exportBtn" onclick="exportPlan()" disabled>Export Plan Summary</button>
+    </div>
+
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="filter-bar">
+      <div class="filter-row">
+        <span class="filter-label">Semester:</span>
+        <button class="fb on" onclick="toggleSem('all',this)">All Semesters</button>
+        <button class="fb" onclick="toggleSem(1,this)" style="border-color:#2c7a7b;color:#2c7a7b">Sem 1 – Autumn 2026</button>
+        <button class="fb" onclick="toggleSem(2,this)" style="border-color:#6b46c1;color:#6b46c1">Sem 2 – Spring 2027</button>
+        <button class="fb" onclick="toggleSem(3,this)" style="border-color:#c05621;color:#c05621">Sem 3 – Autumn 2027</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Category:</span>
+        <button class="fb on" onclick="toggleCat('all',this)">All</button>
+        <button class="fb" onclick="toggleCat('core',this)">Core</button>
+        <button class="fb" onclick="toggleCat('skill',this)">Skill-Based</button>
+        <button class="fb" onclick="toggleCat('maselec',this)">MAS Electives</button>
+        <button class="fb" onclick="toggleCat('furtherelec',this)">Further MTEC Electives</button>
+      </div>
+      <input class="search-input" type="text" placeholder="Search courses by name, ID, lecturer…" oninput="doSearch(this.value)" id="searchBox">
+      <div class="results-count" id="resultsCount"></div>
+    </div>
+    <div id="courseContainer"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const AREAS = [
+  {key:'gm', label:'General Management & HR', color:'#3182ce'},
+  {key:'sm', label:'Strategy, Markets & Technology', color:'#38a169'},
+  {key:'io', label:'Information & Operations Mgmt', color:'#dd6b20'},
+  {key:'qq', label:'Quantitative & Qualitative Methods', color:'#805ad5'},
+  {key:'mm', label:'Micro & Macroeconomics', color:'#d53f8c'},
+  {key:'fm', label:'Financial Management', color:'#d69e2e'},
+];
+
+// sems: array of MAS semesters (1=HS26, 2=FS27, 3=HS27, 4=FS28)
+// blockCourse: boolean (intensive block)
+// blockSlot: e.g. "1", "1/3", "2" (which block within semester)
+// prereqs: boolean
+// masOnly: boolean
+// cat: 'core' | 'skill' | 'maselec' | 'furtherelec'
+// area: key from AREAS (only for core)
+
+const COURSES = [
+  // ── CORE: General Management & HR ──────────────────────────────────────
+  {id:'363-0341-00', name:'Introduction to Management', cat:'core', area:'gm', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"J. O'Neil, D. Baschung"},
+  {id:'363-0301-00', name:'Work Design and Organizational Change', cat:'core', area:'gm', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:true, lecturer:"N. Bienefeld-Seall"},
+  {id:'363-0302-00', name:'Strategic Talent Management in the Age of AI: Leading Human-AI Teams', cat:'core', area:'gm', sems:[2], cp:3, block:false, blockSlot:'3', prereqs:false, masOnly:true, lecturer:"N. Bienefeld-Seall"},
+  {id:'365-1195-00', name:'Organizational Behaviour', cat:'core', area:'gm', sems:[2], cp:3, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"E. Canónico Martin"},
+
+  // ── CORE: Strategy, Markets & Technology ───────────────────────────────
+  {id:'363-0403-00', name:'Introduction to Marketing', cat:'core', area:'sm', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"F. von Wangenheim, P. Bachmann"},
+  {id:'365-1187-00', name:'Corporate Entrepreneurship and Innovation', cat:'core', area:'sm', sems:[2], cp:3, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"B. Clarysse"},
+  {id:'363-0387-00', name:'Corporate Sustainability', cat:'core', area:'sm', sems:[3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"V. Hoffmann, C. Bening-Bach, B. Girod, L. Miehé"},
+  {id:'365-1097-00', name:'Innovation Management', cat:'core', area:'sm', sems:[2], cp:3, block:true, blockSlot:'2', prereqs:false, masOnly:true, lecturer:"P. Bubenzer"},
+  {id:'363-0392-00', name:'Strategic Management', cat:'core', area:'sm', sems:[2,3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"F. Hacklin, A.-K. Weiser"},
+
+  // ── CORE: Information & Operations Management ───────────────────────────
+  {id:'363-0421-00', name:'Management of Digital Transformation', cat:'core', area:'io', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"E. Fleisch"},
+  {id:'363-0445-00', name:'Production and Operations Management', cat:'core', area:'io', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"T. Netland"},
+  {id:'363-0453-00', name:'Strategic Supply Chain Management', cat:'core', area:'io', sems:[3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"S. Wagner"},
+  {id:'363-0425-00', name:'Transformation: Corporate Development and IT', cat:'core', area:'io', sems:[3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"T. Gutzwiller"},
+
+  // ── CORE: Quantitative & Qualitative Methods ────────────────────────────
+  {id:'365-1120-00', name:'AI for Executives', cat:'core', area:'qq', sems:[2], cp:3, block:true, blockSlot:'2', prereqs:false, masOnly:true, lecturer:"J. Zürcher"},
+  {id:'363-0541-00', name:'Economic Dynamics and Complexity', cat:'core', area:'qq', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"L. Verginer"},
+  {id:'363-0305-00', name:'Empirical Methods in Management', cat:'core', area:'qq', sems:[3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"S. Tillmanns, J. B. Ollier"},
+  {id:'363-1004-00', name:'Operations Research', cat:'core', area:'qq', sems:[3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"S. Bütikofer van Oordt"},
+
+  // ── CORE: Micro & Macroeconomics ────────────────────────────────────────
+  {id:'363-0575-00', name:'Economic Growth, Cycles and Policy', cat:'core', area:'mm', sems:[2], cp:3, block:false, blockSlot:null, prereqs:true, masOnly:false, lecturer:"H. Gersbach, H. Mikosch, H. J. van Buggenum", prereqNote:"Requires Principles of Macroeconomics"},
+  {id:'363-0515-00', name:'Markets and Games', cat:'core', area:'mm', sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"B. Lee"},
+  {id:'363-0565-00', name:'Principles of Macroeconomics', cat:'core', area:'mm', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"J.-E. Sturm"},
+  {id:'363-0503-00', name:'Principles of Microeconomics', cat:'core', area:'mm', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"M. Filippini"},
+  {id:'363-0537-00', name:'Sustainability Economics', cat:'core', area:'mm', sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"L. Barrage, M. Drupp"},
+
+  // ── CORE: Financial Management ──────────────────────────────────────────
+  {id:'363-0711-00', name:'Accounting for Managers', cat:'core', area:'fm', sems:[1], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"H. Chen, E. Petrov"},
+  {id:'365-1192-00', name:'Corporate Finance', cat:'core', area:'fm', sems:[2], cp:3, block:true, blockSlot:'2', prereqs:false, masOnly:true, lecturer:"A. Kind"},
+  {id:'365-1191-00', name:'Corporate Governance', cat:'core', area:'fm', sems:[2], cp:3, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"A. Kind"},
+
+  // ── SKILL-BASED TRAINING ────────────────────────────────────────────────
+  {id:'365-1189-00', name:'Personal Leadership (1/4): Mastering Effective Communication', cat:'skill', area:null, sems:[1,2], cp:1, block:true, blockSlot:'1', prereqs:false, masOnly:true, lecturer:"P. Romann"},
+  {id:'365-1193-00', name:'Personal Leadership (2/4): Building High-Performing Teams', cat:'skill', area:null, sems:[1,2], cp:1, block:true, blockSlot:'2', prereqs:false, masOnly:true, lecturer:"P. Romann"},
+  {id:'365-1196-00', name:'Personal Leadership (3/4): Empowering Self-Leadership & Conflict Resolution', cat:'skill', area:null, sems:[1,2], cp:1, block:true, blockSlot:'3', prereqs:false, masOnly:true, lecturer:"P. Romann"},
+  {id:'365-1197-00', name:'Personal Leadership (4/4): Cultivating Advanced Leadership Skills', cat:'skill', area:null, sems:[1,2], cp:1, block:true, blockSlot:'4', prereqs:false, masOnly:true, lecturer:"P. Romann"},
+  {id:'365-1151-00', name:'Applied Business Ethics for Managers', cat:'skill', area:null, sems:[2], cp:2, block:true, blockSlot:'2/4', prereqs:false, masOnly:true, lecturer:"S. Dänzer"},
+  {id:'365-1099-00', name:'Design Thinking: A Human-Centred Approach to Problem Solving', cat:'skill', area:null, sems:[2], cp:2, block:true, blockSlot:'2/3', prereqs:false, masOnly:true, lecturer:"D. Salehabadi"},
+  {id:'365-1019-00', name:'Human Resource Management: Skills in Practice', cat:'skill', area:null, sems:[2], cp:2, block:true, blockSlot:'3', prereqs:false, masOnly:true, lecturer:"M. Gubler, M. Kolbe"},
+  {id:'365-1053-00', name:'Innovation, Creativity and Personality Traits', cat:'skill', area:null, sems:[2], cp:1, block:true, blockSlot:'3', prereqs:false, masOnly:true, lecturer:"D. Laureiro Martinez"},
+  {id:'365-1149-00', name:'Introduction to Personal Branding and Storytelling', cat:'skill', area:null, sems:[2,3,4], cp:1, block:true, blockSlot:'1/2/3/4', prereqs:false, masOnly:true, lecturer:"B. Rübel, P. Geissbühler"},
+  {id:'365-0347-00', name:'Negotiation Skills', cat:'skill', area:null, sems:[2], cp:1, block:true, blockSlot:'3', prereqs:false, masOnly:true, lecturer:"M. Gutmann"},
+
+  // ── MAS MTEC ELECTIVES ──────────────────────────────────────────────────
+  {id:'365-1083-00', name:'Leading the Technology-Driven Enterprise', cat:'maselec', area:null, sems:[1,2], cp:2, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"J. O'Neil, D. Röttger"},
+  {id:'365-1166-00', name:'Learning Factory: Introduction to Lean and Industry 4.0', cat:'maselec', area:null, sems:[1,2], cp:1, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"T. Netland, R. Lorenz"},
+  {id:'365-1059-00', name:'Practicing Strategy', cat:'maselec', area:null, sems:[1,2], cp:1, block:true, blockSlot:'3', prereqs:false, masOnly:true, lecturer:"G. von Krogh, T. Gersdorf, C. H. Park"},
+  {id:'365-0881-01', name:'Advanced Project Management: Cases and Coaching', cat:'maselec', area:null, sems:[2,4], cp:1, block:true, blockSlot:'2/4', prereqs:false, masOnly:true, lecturer:"T. Haas, M. A. Zoller", noteStr:"⁴ Can't combine with 365-0881-00"},
+  {id:'365-1190-00', name:'Climate Risk, Sustainable Business and Finance', cat:'maselec', area:null, sems:[2], cp:2, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"B. Huber, B. J. Bergmann"},
+  {id:'365-1194-00', name:'Cybersecurity for Business Leaders', cat:'maselec', area:null, sems:[2], cp:2, block:true, blockSlot:'2/4', prereqs:false, masOnly:true, lecturer:"S. Frei, R. Halbheer"},
+  {id:'365-1143-00', name:'Digital Transformation: Integrating Cloud and Business', cat:'maselec', area:null, sems:[2], cp:1, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"R. Halbheer"},
+  {id:'365-1173-00', name:'Fundamentals of Machine Learning for Executives', cat:'maselec', area:null, sems:[2], cp:1, block:true, blockSlot:'2', prereqs:false, masOnly:true, lecturer:"J. Zürcher, T. Motz"},
+  {id:'365-1181-00', name:'Introduction to Quantum Computing: Current Challenges and Business Insights', cat:'maselec', area:null, sems:[2], cp:2, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"P. Kammerlander, B. J. Bergmann"},
+  {id:'365-1183-00', name:'Leveraging Generative AI for Sustainable Business Value', cat:'maselec', area:null, sems:[2], cp:2, block:true, blockSlot:'1/3', prereqs:false, masOnly:true, lecturer:"A. Ferrario, B. J. Bergmann, J. Teichmann"},
+  {id:'365-0881-00', name:'Mastering Project Management: From Classic to Agile Approaches', cat:'maselec', area:null, sems:[2,4], cp:2, block:true, blockSlot:'2', prereqs:false, masOnly:true, lecturer:"D. Ritler", noteStr:"⁴ Can't combine with 365-0881-01"},
+  {id:'365-1086-00', name:'Organizational Change Management', cat:'maselec', area:null, sems:[2], cp:2, block:true, blockSlot:'2', prereqs:false, masOnly:true, lecturer:"M. Banerjee"},
+  {id:'365-1141-00', name:'Platform and Ecosystem Strategies', cat:'maselec', area:null, sems:[2], cp:1, block:true, blockSlot:'2/4', prereqs:false, masOnly:true, lecturer:"F. Hacklin"},
+  {id:'365-1059-01', name:'Resilience – Beyond Risk Management', cat:'maselec', area:null, sems:[2], cp:2, block:true, blockSlot:'2/4', prereqs:false, masOnly:true, lecturer:"O. Kocsis, A. van Vegten"},
+  {id:'365-1071-00', name:'Course Abroad', cat:'maselec', area:null, sems:[4], cp:3, block:true, blockSlot:'4', prereqs:false, masOnly:true, lecturer:"Various"},
+
+  // ── FURTHER MTEC ELECTIVES ──────────────────────────────────────────────
+  {id:'363-0861-00', name:'Alliance Advantage – Exploring Value Creation Potential of Collaborations', cat:'furtherelec', area:null, sems:[1,3], cp:3, block:true, blockSlot:'1', prereqs:true, masOnly:false, lecturer:"C. G. C. Marxt"},
+  {id:'363-0393-00', name:'Corporate Strategy', cat:'furtherelec', area:null, sems:[3], cp:3, block:true, blockSlot:null, prereqs:false, masOnly:false, lecturer:"S. Ben-Menahem"},
+  {id:'363-1153-00', name:'Decentralized Finance', cat:'furtherelec', area:null, sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"B. J. Bergmann, H. Gersbach, S. Zelzner"},
+  {id:'363-1082-00', name:'Enabling Entrepreneurship: From Science to Startup', cat:'furtherelec', area:null, sems:[1,3], cp:3, block:false, blockSlot:null, prereqs:true, masOnly:false, lecturer:"R. De Cock"},
+  {id:'363-1028-00', name:'Entrepreneurial Leadership', cat:'furtherelec', area:null, sems:[1,3], cp:4, block:true, blockSlot:null, prereqs:true, masOnly:false, lecturer:"Z. Erden Özkol, S. Brusoni, O. von Dzengelevski, G. von Krogh"},
+  {id:'363-1077-00', name:'Entrepreneurship', cat:'furtherelec', area:null, sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"B. Clarysse"},
+  {id:'363-0448-00', name:'Global Operations Strategy', cat:'furtherelec', area:null, sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"O. von Dzengelevski"},
+  {id:'363-0792-00', name:'Knowledge Management', cat:'furtherelec', area:null, sems:[2], cp:1, block:true, blockSlot:null, prereqs:false, masOnly:false, lecturer:"P. Wolf"},
+  {id:'363-0887-00', name:'Management Research', cat:'furtherelec', area:null, sems:[2,3], cp:1, block:true, blockSlot:null, prereqs:false, masOnly:false, lecturer:"C. Liu"},
+  {id:'363-1060-00', name:'Strategies for Sustainable Business', cat:'furtherelec', area:null, sems:[2], cp:3, block:true, blockSlot:null, prereqs:false, masOnly:false, lecturer:"J. Meuer"},
+  {id:'363-0389-00', name:'Technology and Innovation Management', cat:'furtherelec', area:null, sems:[3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"S. Brusoni, A. Zeijen"},
+  {id:'363-0790-00', name:'Technology Entrepreneurship', cat:'furtherelec', area:null, sems:[1,3], cp:2, block:false, blockSlot:null, prereqs:true, masOnly:false, lecturer:"F. Hacklin"},
+];
+
+// ─── COURSE DETAILS (fetched from ETH VVZ, HS2026) ─────────────────────────
+// Fields: abstract, schedule (e.g."Thu 12:15–14:00 HG F 5"), exam, recorded
+// recorded: true=yes, false=no, null=unknown/block course
+const COURSE_DETAILS = {
+  '363-0341-00':{abstract:"Introduction to general management using the congruence model to analyze organizations as open systems: strategy, people, work, formal and informal structure.",schedule:"Thu 12:15–14:00, HG F 5",exam:"Written 60 min · closed-book · digital exam",recorded:true},
+  '363-0301-00':{abstract:"Good work design is crucial for individual and company effectiveness. Covers meaning of work, organization-technology interaction, and uncertainty management.",schedule:null,exam:"Graded semester performance",recorded:null},
+  '363-0302-00':{abstract:"Strategic talent management in the age of AI, focusing on leading human-AI teams and workforce strategy.",schedule:null,exam:"Graded semester performance",recorded:null},
+  '365-1195-00':{abstract:"Organisational Behaviour essentials: people skills, team dynamics, leadership, motivation and organizational culture for workplace success.",schedule:'03–05 Sep · 08:15–17:00, HG D 16.2',exam:"Graded semester performance (block)",recorded:null},
+  '363-0403-00':{abstract:"Overview of marketing perspectives: frameworks and methods for marketing decision-making including digital and data-driven approaches.",schedule:"Tue 08:15–10:00, ML H 44",exam:"Written 60 min · open-book",recorded:true},
+  '365-1187-00':{abstract:"How corporations manage entrepreneurship and innovation — covering front-end innovation, corporate venturing, and managing innovation ecosystems.",schedule:'05–07 Nov · 09:15–18:00, WEV F 109',exam:"Graded semester performance (block)",recorded:null},
+  '363-0387-00':{abstract:"Current challenges of corporate sustainability; prepares students to champion sustainable business practices within organizations.",schedule:"Wed 16:15–18:00, HG E 1.2",exam:"Written 60 min · closed-book",recorded:null},
+  '365-1097-00':{abstract:"Innovation management frameworks covering the full innovation process from ideation to commercialization.",schedule:null,exam:"Graded semester performance (block)",recorded:null},
+  '363-0392-00':{abstract:"Central theories, frameworks, and tools for developing competitive strategies in dynamic environments.",schedule:"Wed 10:15–14:00, ML F 36",exam:"Written 90 min",recorded:null},
+  '363-0421-00':{abstract:"Overview of Digital Transformation in organizations: opportunities, challenges, and how to manage organizational change in the digital era.",schedule:"Tue 14:15–16:00, HG G 3",exam:"Written 60 min",recorded:true},
+  '363-0445-00':{abstract:"Insights into the theories, principles, concepts, and techniques used to design, analyze, and improve operations and supply chains.",schedule:"Thu 14:15–16:00, CAB G 11",exam:"Written 90 min",recorded:null},
+  '363-0453-00':{abstract:"Introduction to supply chain management theory and practice; develop supply chain strategies and manage complex inter-firm networks.",schedule:"Wed 08:15–10:00, HG E 1.1",exam:"Written 60 min",recorded:null},
+  '363-0425-00':{abstract:"Main challenges of business transformation and alignment of corporate development and IT activities; frameworks and cases.",schedule:"Mon 12:00–18:00 (online)",exam:"Graded semester performance",recorded:true},
+  '365-1120-00':{abstract:"AI for business executives: practical AI literacy, use cases, and strategic implications of AI adoption.",schedule:null,exam:"Graded semester performance (block)",recorded:null},
+  '363-0541-00':{abstract:"How do economies grow and tip into crisis? How does technology spread through production networks? Complexity economics and system dynamics.",schedule:"Tue 10:15–12:00, ML H 44",exam:"Written 90 min",recorded:null},
+  '363-0305-00':{abstract:"How to understand and conduct empirical research in management. Enables evidence-based decision-making with practical assignments.",schedule:"Wed 14:15–16:00, HG E 1.1",exam:"Written 90 min",recorded:true},
+  '363-1004-00':{abstract:"Introduction to operations research methods in management science and economics; linear programming, optimization, and decision models.",schedule:"Mon 08:15–10:00, CHN C 14",exam:"Written 90 min",recorded:true},
+  '363-0575-00':{abstract:"Economic growth cycles and policy: long-run growth, business cycle fluctuations, and macroeconomic stabilization policy.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-0515-00':{abstract:"Game theory and market design: strategic interaction, mechanism design, auctions, and bargaining.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-0565-00':{abstract:"Behavior of macroeconomic variables (GDP, unemployment, inflation). Macroeconomic models and policy analysis.",schedule:"Tue 16:15–18:00, ETA F 5",exam:"Written 90 min",recorded:true},
+  '363-0503-00':{abstract:"Basic principles of microeconomics: how societies use scarce resources, supply and demand, market structures, and welfare analysis.",schedule:"Thu 08:15–10:00, ML D 28",exam:"Written 90 min",recorded:null},
+  '363-0537-00':{abstract:"Economic foundations of sustainability: externalities, market failures, environmental policy, and the economics of climate change.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-0711-00':{abstract:"Introduction to financial and managerial accounting for students with science/engineering backgrounds; reading financial statements.",schedule:"Thu 10:15–12:00, HG F 3",exam:"Written 60 min · calculator allowed",recorded:true},
+  '365-1192-00':{abstract:"Corporate finance fundamentals: valuation, capital structure, investment decisions, and risk for MAS MTEC students.",schedule:null,exam:"End-of-semester examination (block)",recorded:null},
+  '365-1191-00':{abstract:"Corporate governance: conflicts of interest between shareholders, managers and boards; governance mechanisms and regulation.",schedule:'08–10 Oct · 09:15–18:00, LEE E 101',exam:"Written 60 min (block)",recorded:null},
+  '365-1189-00':{abstract:"Leadership starts with communication: conveying your message effectively and listening actively to build productive relationships.",schedule:'28–29 Aug & 25–26 Sep · 08:15–17:00',exam:"Ungraded (block, 1 day)",recorded:null},
+  '365-1193-00':{abstract:"Building high-performing teams: team dynamics, collaboration techniques, conflict resolution, and team leadership.",schedule:null,exam:"Ungraded (block, 1 day)",recorded:null},
+  '365-1196-00':{abstract:"Self-leadership and conflict resolution: managing stress, adversity, and interpersonal conflicts with clarity and resilience.",schedule:'21–22 Aug & 18–19 Sep · 08:15–17:00, WEV F 109',exam:"Ungraded (block, 1 day)",recorded:null},
+  '365-1197-00':{abstract:"Advanced leadership skills: cultivating executive presence, influencing without authority, and leading with impact.",schedule:null,exam:"Ungraded (block, 1 day)",recorded:null},
+  '365-1151-00':{abstract:"Applied business ethics for managers: ethical frameworks, stakeholder analysis, and decision-making in complex business contexts.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1099-00':{abstract:"Design thinking — a human-centred approach to problem solving using empathy, ideation, prototyping and testing methods.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1019-00':{abstract:"Practical HRM skills covering core HR processes: recruitment, performance management, talent development, and leadership.",schedule:'24 Oct (online) · 04–05 Dec · 08:15–17:00, HG E 23',exam:"Ungraded (block) · attendance mandatory",recorded:false},
+  '365-1053-00':{abstract:"Latest research on improving creative problem solving to foster individual career growth and organizational performance.",schedule:'30–31 Oct · 09:15–18:00, WEV F 109',exam:"Ungraded (block)",recorded:null},
+  '365-1149-00':{abstract:"Build and communicate your personal brand story. Learn to proactively guide your professional image and networking.",schedule:'23–24 Oct · 08:15–17:00, WEV F 109',exam:"Ungraded (block)",recorded:null},
+  '365-0347-00':{abstract:"Practical negotiation frameworks applied through simulations, discussions and exercises across real-world scenarios.",schedule:'11–12 Sep · 08:15–17:00, IFW A 32.1',exam:"Ungraded (block)",recorded:null},
+  '365-1083-00':{abstract:"Change leadership bloc-course: coaching and mentoring from senior change leaders, real-world case discussions.",schedule:'27–28 Nov & 11 Dec · 09:15–18:00, LEE E 101',exam:"Ungraded (block)",recorded:null},
+  '365-1166-00':{abstract:"Fundamentals of Lean Production and Industry 4.0 through hands-on factory simulation and digital manufacturing.",schedule:'13 Nov & 20 Nov · 09:15–16:00, WEV F 109',exam:"Ungraded (block)",recorded:null},
+  '365-1059-00':{abstract:"Special course supplementing Strategic Management: participants work on real strategy challenges from partner companies.",schedule:'28 Aug & 25 Sep · 10:15–19:00',exam:"Ungraded (block)",recorded:null},
+  '365-0881-01':{abstract:"Advanced project management through real case coaching and peer-to-peer learning from experienced project managers.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1190-00':{abstract:"Climate change risks, biodiversity loss, and sustainable finance strategies. Covers ESG, green bonds, and risk management.",schedule:'07–09 Sep · 09:15–17:00, ML F 34',exam:"Ungraded (block)",recorded:null},
+  '365-1194-00':{abstract:"Cybersecurity for business leaders: threat landscape, risk governance, cyber strategy, and crisis response.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1143-00':{abstract:"Digitalization in business: role of IT and cybersecurity in integrating cloud and digital strategies.",schedule:'14 Nov & 21 Nov · 08:15–17:00, LEE E 101',exam:"Ungraded (block)",recorded:null},
+  '365-1173-00':{abstract:"Machine learning fundamentals for executives: key algorithms, AI use cases, and business value creation.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1181-00':{abstract:"Introduction to quantum computing: principles, current state, and potential business implications in a 3-day intensive.",schedule:'01–03 Oct · 09:15–18:00, HG E 23 / LEE E 101',exam:"Ungraded (block)",recorded:null},
+  '365-1183-00':{abstract:"GenAI and machine learning in industry: practical understanding and applications for sustainable business value.",schedule:'15–17 Oct · 09:15–17:00, LEE E 101',exam:"Ungraded (block)",recorded:null},
+  '365-0881-00':{abstract:"Mastering project management from classic to agile approaches through frameworks, tools, and coaching.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1086-00':{abstract:"Organizational change management: theories and tools for leading successful transformation programs.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1141-00':{abstract:"Platform and ecosystem strategies: how platforms create value, network effects, and competitive dynamics.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1059-01':{abstract:"Resilience beyond risk management: building organizational and personal resilience in volatile environments.",schedule:null,exam:"Ungraded (block)",recorded:null},
+  '365-1071-00':{abstract:"International study trip to learn from companies and institutions abroad. Includes site visits and workshops.",schedule:null,exam:"Ungraded",recorded:null},
+  '363-0861-00':{abstract:"Alliance strategy in innovation ecosystems: developing business models through collaboration and value creation partnerships.",schedule:'19 Sep · 17 Oct · 12 Dec · 08:15–17:00, WEV H 326',exam:"Graded semester performance",recorded:null},
+  '363-0393-00':{abstract:"Corporate strategy: how firms create and sustain competitive advantage at the multi-business level.",schedule:'19–21 Oct · 09:15–17:00, HG F 26.3',exam:"End-of-semester examination",recorded:null},
+  '363-1153-00':{abstract:"Decentralized finance (DeFi): blockchain, smart contracts, tokenization, and the future of financial systems.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-1082-00':{abstract:"Enabling entrepreneurship from science to startup: technology transfer, spin-off creation, and venture development.",schedule:'07 Oct, 14–28 Oct (bi-weekly online) · 09 Dec · HG F 26.1',exam:"End-of-semester examination",recorded:null},
+  '363-1028-00':{abstract:"Entrepreneurial leadership: leading ventures through growth, building entrepreneurial teams and scaling organizations.",schedule:null,exam:"Graded semester performance",recorded:null},
+  '363-1077-00':{abstract:"Entrepreneurship: creating new ventures, business models, opportunity recognition, and entrepreneurial ecosystems.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-0448-00':{abstract:"Global operations strategy: designing global supply networks, offshoring decisions, and operations in emerging markets.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-0792-00':{abstract:"Knowledge management: how organizations create, share, and leverage knowledge for competitive advantage.",schedule:null,exam:"Ungraded semester performance",recorded:null},
+  '363-0887-00':{abstract:"How to approach management research from multiple perspectives; evaluate empirical research and design studies.",schedule:'17 Sep & 28 Sep · 08:15–16:00, HG F 26.3',exam:"Ungraded semester performance",recorded:null},
+  '363-1060-00':{abstract:"Strategies for sustainable business: integrating environmental and social sustainability into business strategy.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-0389-00':{abstract:"Technology and innovation management: frameworks for managing technological change, R&D, and innovation strategy.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-0790-00':{abstract:"Technology entrepreneurship: commercializing technology, IP strategy, and building tech ventures.",schedule:null,exam:"End-of-semester examination",recorded:null},
+};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let selectedIds = new Set();
+let filterSem = 'all';
+let filterCat = 'all';
+let searchQuery = '';
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+const SEM_LABELS = {1:'Sem 1 · HS26', 2:'Sem 2 · FS27', 3:'Sem 3 · HS27', 4:'Sem 4 · FS28'};
+const SEM_COLORS = {1:'#2c7a7b', 2:'#6b46c1', 3:'#c05621', 4:'#b7791f'};
+const CAT_LABELS = {core:'Core Course', skill:'Skill-Based Training', maselec:'MAS Elective', furtherelec:'Further MTEC Elective'};
+const CAT_COLORS = {core:'#3182ce', skill:'#38a169', maselec:'#805ad5', furtherelec:'#dd6b20'};
+const CAT_BORDER = {core:'#bee3f8', skill:'#9ae6b4', maselec:'#d6bcfa', furtherelec:'#fbd38d'};
+
+// Real VVZ lerneinheitIds extracted from the ETH Course Catalogue (HS2026)
+const VID_MAP = {
+  '363-0341-00': 203590, // Introduction to Management
+  '363-0301-00': 203802, // Work Design and Organizational Change
+  '365-1195-00': 204655, // Organizational Behaviour
+  '363-0403-00': 203175, // Introduction to Marketing
+  '365-1187-00': 204875, // Corporate Entrepreneurship and Innovation
+  '363-0387-00': 203070, // Corporate Sustainability
+  '363-0392-00': 203655, // Strategic Management
+  '363-0421-00': 203749, // Management of Digital Transformation
+  '363-0445-00': 204560, // Production and Operations Management
+  '363-0453-00': 204245, // Strategic Supply Chain Management
+  '363-0425-00': 203891, // Transformation: Corporate Development and IT
+  '363-0541-00': 203413, // Economic Dynamics and Complexity
+  '363-0305-00': 203895, // Empirical Methods in Management
+  '363-1004-00': 204181, // Operations Research
+  '363-0565-00': 203028, // Principles of Macroeconomics
+  '363-0503-00': 203879, // Principles of Microeconomics
+  '363-0711-00': 202930, // Accounting for Managers
+  '365-1191-00': 202562, // Corporate Governance
+  '365-1189-00': 203579, // Personal Leadership (1/4): Mastering Effective Communication
+  '365-1196-00': 202631, // Personal Leadership (3/4): Empowering Self-Leadership & Conflict Resolution
+  '365-1099-00': 202636, // Design Thinking: A Human-Centred Approach
+  '365-1019-00': 204384, // Human Resource Management: Skills in Practice
+  '365-1053-00': 204794, // Innovation, Creativity and Personality Traits
+  '365-1149-00': 204481, // Introduction to Personal Branding and Storytelling
+  '365-0347-00': 203267, // Negotiation Skills
+  '365-1083-00': 203339, // Leading the Technology-Driven Enterprise
+  '365-1166-00': 203970, // Learning Factory: Introduction to Lean and Industry 4.0
+  '365-1059-00': 203236, // Practicing Strategy
+  '365-1190-00': 203084, // Climate Risk, Sustainable Business and Finance
+  '365-1143-00': 204356, // Digital Transformation: Integrating Cloud and Business
+  '365-1181-00': 204668, // Introduction to Quantum Computing
+  '365-1183-00': 202808, // Leveraging Generative AI for Sustainable Business Value
+  '363-0861-00': 202785, // Alliance Advantage
+  '363-0393-00': 203617, // Corporate Strategy
+  '363-1082-00': 203796, // Enabling Entrepreneurship: From Science to Startup
+  '363-0887-00': 203954, // Management Research
+  '363-0389-00': 203792, // Technology and Innovation Management
+  '363-0790-00': 202716, // Technology Entrepreneurship
+};
+
+function vvzLink(id, sem) {
+  const vid = VID_MAP[id];
+  if (vid) {
+    // Direct link to course page using real lerneinheitId
+    // Use 2026W for odd semesters (HS), 2027S for even (FS) — best available
+    const semKey = (sem === 2 || sem === 4) ? '2027S' : '2026W';
+    return `https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?lerneinheitId=${vid}&semkez=${semKey}&ansicht=LEHRVERANSTALTUNGEN&lang=en`;
+  }
+  // Fallback: search in MAS MTEC programme listing
+  return `https://www.vvz.ethz.ch/Vorlesungsverzeichnis/sucheLehrangebot.view?seite=0&semkez=2026W&studiengangAbschnittId=122807&ansicht=1&lang=en`;
+}
+
+function openCourse(id, sem, event) {
+  event.stopPropagation();
+  window.open(vvzLink(id, sem), '_blank');
+}
+
+function semBadge(sems) {
+  return sems.map(s => {
+    const cls = s===1?'b-sem1':s===2?'b-sem2':s===3?'b-sem3':'b-sem1';
+    return `<span class="badge ${cls}">${SEM_LABELS[s]}</span>`;
+  }).join('');
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function matchesSem(c) {
+  if (filterSem === 'all') return true;
+  return c.sems.includes(filterSem);
+}
+function matchesCat(c) {
+  if (filterCat === 'all') return true;
+  return c.cat === filterCat;
+}
+function matchesSearch(c) {
+  if (!searchQuery) return true;
+  const q = searchQuery.toLowerCase();
+  return c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || c.lecturer.toLowerCase().includes(q);
+}
+
+function fmtExamTag(exam) {
+  if (!exam) return '';
+  if (/graded semester/i.test(exam)) return `<span class="detail-tag tag-graded">Graded perf.</span>`;
+  if (/ungraded/i.test(exam)) return `<span class="detail-tag tag-ungraded">Ungraded</span>`;
+  const m = exam.match(/(\d+)\s*min/i);
+  if (m) return `<span class="detail-tag tag-written">Written ${m[1]} min</span>`;
+  return `<span class="detail-tag tag-written">${exam.substring(0,22)}</span>`;
+}
+
+function fmtRecTag(recorded) {
+  if (recorded === true) return `<span class="detail-tag tag-recorded">🎥 Recorded</span>`;
+  if (recorded === false) return `<span class="detail-tag tag-not-recorded">🚫 Not recorded</span>`;
+  return '';
+}
+
+function renderCard(c) {
+  const sel = selectedIds.has(c.id);
+  const det = COURSE_DETAILS[c.id] || {};
+  const abstract = det.abstract || '';
+  const schedule = det.schedule || (c.block ? 'Block course (intensive)' : '');
+  const exam = det.exam || '';
+  const recorded = det.recorded;
+
+  const examTag = fmtExamTag(exam);
+  const recTag = fmtRecTag(recorded);
+
+  const hasExamDetails = exam && !(/graded|ungraded/i.test(exam));
+  let examDetail = '';
+  if (hasExamDetails) {
+    const aids = exam.match(/·\s*(.+)/);
+    if (aids) examDetail = `<span style="font-size:0.65rem;color:#718096"> · ${aids[1]}</span>`;
+  }
+
+  return `
+  <div class="card${sel?' selected':''}" onclick="toggleCourse('${c.id}')" data-id="${c.id}">
+    <div class="card-header">
+      <div class="check-box"></div>
+      <div style="flex:1">
+        <div class="card-title">${c.name}</div>
+        <div class="card-id" style="display:flex;align-items:center;gap:5px">${c.id} <span class="copy-id" onclick="copyId('${c.id}',event)" title="Copy course ID">⎘</span></div>
+      </div>
+    </div>
+    <div class="badges">
+      <span class="badge b-cp">${c.cp} CP</span>
+      ${semBadge(c.sems)}
+      ${c.block ? `<span class="badge b-block">Block${c.blockSlot?' '+c.blockSlot:''}</span>` : ''}
+      ${c.prereqs ? `<span class="badge b-prereq">⚠ Prerequisites</span>` : ''}
+      ${c.masOnly ? `<span class="badge b-masonly">MAS only</span>` : ''}
+    </div>
+    ${abstract ? `<div class="card-abstract">${abstract}</div>` : ''}
+    <div class="card-details">
+      ${schedule ? `<div class="detail-row detail-full"><span class="detail-icon">📅</span><span class="detail-val">${schedule}</span></div>` : ''}
+      ${examTag ? `<div class="detail-row"><span class="detail-icon">📝</span><span class="detail-val">${examTag}${examDetail}</span></div>` : ''}
+      ${recTag ? `<div class="detail-row"><span class="detail-icon"></span><span class="detail-val">${recTag}</span></div>` : ''}
+    </div>
+    <div class="card-footer" style="margin-top:6px">
+      <div class="card-lecturer">${c.lecturer}</div>
+      <button class="card-link-btn" onclick="openCourse('${c.id}',${c.sems[0]},event)" title="Open course in ETH VVZ Catalogue">VVZ ↗</button>
+    </div>
+    ${c.prereqNote ? `<div style="font-size:0.66rem;color:#b7791f;margin-top:5px">Prerequisite: ${c.prereqNote}</div>` : ''}
+    ${c.noteStr ? `<div style="font-size:0.66rem;color:#718096;margin-top:4px">${c.noteStr}</div>` : ''}
+  </div>`;
+}
+
+function renderMain() {
+  const filtered = COURSES.filter(c => matchesSem(c) && matchesCat(c) && matchesSearch(c));
+  const container = document.getElementById('courseContainer');
+  document.getElementById('resultsCount').textContent = `Showing ${filtered.length} of ${COURSES.length} courses`;
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="no-results">No courses match your filters.</div>';
+    return;
+  }
+
+  // Group by category
+  const catOrder = ['core','skill','maselec','furtherelec'];
+  const catNames = {
+    core: 'Core Courses',
+    skill: 'Skill-Based Training',
+    maselec: 'MAS MTEC Electives',
+    furtherelec: 'Further MTEC Electives'
+  };
+  const catNotes = {
+    core: 'Complete ≥3 CP in at least 5 of 6 competence areas',
+    skill: 'MAS MTEC students only · Complete ≥2 courses',
+    maselec: 'MAS MTEC students only',
+    furtherelec: 'Regular ETH/MTEC courses · max 6 CP from other departments'
+  };
+
+  let html = '';
+  for (const cat of catOrder) {
+    const courses = filtered.filter(c => c.cat === cat);
+    if (!courses.length) continue;
+
+    const color = CAT_COLORS[cat];
+    html += `<div class="course-section"><div class="section-head" style="border-color:${color}">
+      <span class="section-head-title" style="color:${color}">${catNames[cat]}</span>
+      <span class="section-head-meta">${catNotes[cat]}</span>
+    </div>`;
+
+    if (cat === 'core') {
+      // Group by competence area
+      for (const area of AREAS) {
+        const aCourses = courses.filter(c => c.area === area.key);
+        if (!aCourses.length) continue;
+        html += `<div class="area-group"><div class="area-head area-${area.key}" style="border-left-color:${area.color}">${area.label}</div>`;
+        html += `<div class="card-grid">` + aCourses.map(renderCard).join('') + `</div></div>`;
+      }
+    } else {
+      html += `<div class="card-grid">` + courses.map(renderCard).join('') + `</div>`;
+    }
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function renderSidebar() {
+  // CP
+  const total = [...selectedIds].reduce((sum, id) => {
+    const c = COURSES.find(x => x.id === id);
+    return sum + (c ? c.cp : 0);
+  }, 0);
+  document.getElementById('totalCP').textContent = total;
+  document.getElementById('cpBar').style.width = Math.min(100, (total/15)*100) + '%';
+
+  // Area coverage
+  const areaCP = {};
+  AREAS.forEach(a => areaCP[a.key] = 0);
+  [...selectedIds].forEach(id => {
+    const c = COURSES.find(x => x.id === id);
+    if (c && c.area) areaCP[c.area] = (areaCP[c.area] || 0) + c.cp;
+  });
+
+  let areasMetCount = AREAS.filter(a => areaCP[a.key] >= 3).length;
+  let areaHtml = '';
+  for (const area of AREAS) {
+    const cp = areaCP[area.key] || 0;
+    const met = cp >= 3;
+    const partial = cp > 0 && cp < 3;
+    const dotColor = met ? area.color : partial ? '#d69e2e' : '#e2e8f0';
+    areaHtml += `<div class="area-row">
+      <div class="area-indicator" style="background:${dotColor}"></div>
+      <div class="area-text">${area.label}</div>
+      <div class="area-count ${met?'met':'unmet'}">${cp} CP</div>
+    </div>`;
+  }
+  document.getElementById('areaList').innerHTML = areaHtml;
+
+  const reqEl = document.getElementById('reqMsg');
+  if (areasMetCount >= 5) {
+    reqEl.className = 'req-msg req-ok';
+    reqEl.textContent = `✓ ${areasMetCount}/6 areas covered (≥3 CP each) — requirement met!`;
+  } else {
+    reqEl.className = 'req-msg req-warn';
+    reqEl.textContent = `${areasMetCount}/6 areas with ≥3 CP (need 5). Coverage across all 4 semesters.`;
+  }
+
+  // Selected list
+  const selEl = document.getElementById('selectedList');
+  const totEl = document.getElementById('selTotal');
+  if (!selectedIds.size) {
+    selEl.innerHTML = '<div class="empty-msg">Click a course card to add it.</div>';
+    totEl.style.display = 'none';
+  } else {
+    selEl.innerHTML = [...selectedIds].map(id => {
+      const c = COURSES.find(x => x.id === id);
+      if (!c) return '';
+      return `<div class="sel-item">
+        <div class="sel-name">${c.name}</div>
+        <div class="sel-right">
+          <span class="sel-cp">${c.cp}CP</span>
+          <button class="sel-remove" onclick="removeCourse('${c.id}')" title="Remove">×</button>
+        </div>
+      </div>`;
+    }).join('');
+    totEl.style.display = '';
+    totEl.textContent = `Total: ${total} CP selected`;
+  }
+  document.getElementById('exportBtn').disabled = selectedIds.size === 0;
+}
+
+function render() {
+  renderMain();
+  renderSidebar();
+}
+
+// ─── INTERACTIONS ────────────────────────────────────────────────────────────
+
+function toggleCourse(id) {
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+  } else {
+    selectedIds.add(id);
+  }
+  render();
+}
+
+function removeCourse(id) {
+  selectedIds.delete(id);
+  render();
+}
+
+function toggleSem(val, btn) {
+  filterSem = val;
+  document.querySelectorAll('.filter-row:nth-child(1) .fb').forEach(b => b.classList.remove('on','sem1','sem2','sem3','sem12'));
+  btn.classList.add('on');
+  if(val===1) btn.classList.add('sem1');
+  if(val===2) btn.classList.add('sem2');
+  if(val===3) btn.classList.add('sem3');
+  render();
+}
+
+function toggleCat(val, btn) {
+  filterCat = val;
+  document.querySelectorAll('.filter-row:nth-child(2) .fb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function doSearch(val) {
+  searchQuery = val.trim();
+  render();
+}
+
+function copyId(id, event) {
+  event.stopPropagation();
+  navigator.clipboard.writeText(id).then(() => showToast(`Copied: ${id}`)).catch(() => {});
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
+function exportPlan() {
+  if (!selectedIds.size) return;
+
+  const selected = [...selectedIds].map(id => COURSES.find(c => c.id === id)).filter(Boolean);
+  const total = selected.reduce((s,c) => s + c.cp, 0);
+
+  const catCP = {core:0, skill:0, maselec:0, furtherelec:0};
+  const catCounts = {core:0, skill:0, maselec:0, furtherelec:0};
+  selected.forEach(c => { catCP[c.cat] = (catCP[c.cat]||0)+c.cp; catCounts[c.cat]++; });
+
+  const areaCP = {};
+  AREAS.forEach(a => areaCP[a.key] = 0);
+  selected.forEach(c => { if(c.area) areaCP[c.area] = (areaCP[c.area]||0)+c.cp; });
+  const areasMetCount = AREAS.filter(a => areaCP[a.key] >= 3).length;
+
+  const semNames = {1:'Semester 1 (HS 2026)', 2:'Semester 2 (FS 2027)', 3:'Semester 3 (HS 2027)', 4:'Semester 4 (FS 2028)'};
+  const bySem = {1:[], 2:[], 3:[], 4:[]};
+  selected.forEach(c => { (c.sems||[]).forEach(s => { if(!bySem[s].find(x=>x.id===c.id)) bySem[s].push(c); }); });
+
+  // Detect how many semesters have courses selected
+  const semsWithCourses = [1,2,3,4].filter(s => bySem[s].length > 0);
+  const planComplete = semsWithCourses.length === 4; // only flag shortfalls when all 4 sems planned
+
+  // Requirements are program-wide (all 4 semesters).
+  // Only mark as failing if plan is complete and still short; otherwise show as "in progress".
+  function req(programOk, label, val) {
+    const ok = programOk;
+    const warn = !ok && planComplete; // only warn if all semesters planned
+    return {ok, warn, label, val};
+  }
+  const checks = [
+    req(total >= 60,            'Total credit points ≥ 60 CP (whole program)',                 total + ' CP'),
+    req(catCP.core >= 15,       'Core courses ≥ 15 CP (whole program)',                        catCP.core + ' CP (' + catCounts.core + ' courses)'),
+    req(catCounts.skill >= 2,   'Skill-based training ≥ 2 courses (whole program)',            catCounts.skill + ' courses (' + catCP.skill + ' CP)'),
+    req(areasMetCount >= 5,     '≥ 5 competence areas covered ≥ 3 CP each (whole program)',   areasMetCount + '/6 areas'),
+    req(catCP.furtherelec <= 6, 'Further electives from other departments ≤ 6 CP',             catCP.furtherelec + ' CP'),
+  ];
+  const allOk = checks.every(c => c.ok);
+  const anyWarn = checks.some(c => c.warn);
+
+  function semTable(sem) {
+    const courses = bySem[sem];
+    if (!courses.length) return '<p style="color:#a0aec0;font-style:italic;font-size:0.8rem">No courses selected for this semester.</p>';
+    const semTotal = courses.reduce((s,c) => s+c.cp, 0);
+    const rows = courses.map(c => {
+      const det = COURSE_DETAILS[c.id] || {};
+      const schedule = det.schedule || (c.block ? 'Block (intensive)' : '—');
+      const exam = det.exam || '—';
+      const catLabel = {core:'Core',skill:'Skill',maselec:'MAS Elec.',furtherelec:'Further Elec.'}[c.cat]||c.cat;
+      const areaObj = c.area ? AREAS.find(a=>a.key===c.area) : null;
+      return '<tr><td style="font-weight:600">' + c.name + '</td><td style="color:#718096;font-size:0.75rem">' + c.id + '</td><td style="text-align:center">' + c.cp + '</td><td style="color:#4a5568;font-size:0.75rem">' + catLabel + (areaObj ? '<br><span style="color:#a0aec0">' + areaObj.label + '</span>' : '') + '</td><td style="color:#4a5568;font-size:0.75rem">' + schedule + '</td><td style="color:#4a5568;font-size:0.75rem">' + exam + '</td></tr>';
+    }).join('');
+    return '<table><thead><tr><th>Course</th><th>ID</th><th>CP</th><th>Category / Area</th><th>Schedule</th><th>Exam</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr><td colspan="2" style="font-weight:700">Semester total</td><td style="font-weight:700;text-align:center">' + semTotal + '</td><td colspan="3"></td></tr></tfoot></table>';
+  }
+
+  const areaBars = AREAS.map(a => {
+    const cp = areaCP[a.key] || 0;
+    const met = cp >= 3;
+    const pct = Math.min(100, (cp/6)*100);
+    return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:3px"><span style="color:#2d3748">' + a.label + '</span><span style="font-weight:700;color:' + (met?'#276749':'#a0aec0') + '">' + cp + ' CP ' + (met ? '✓' : cp > 0 ? '(need ' + (3-cp) + ' more)' : '—') + '</span></div><div style="background:#e2e8f0;border-radius:4px;height:7px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:' + (met?a.color:'#d69e2e') + ';border-radius:4px"></div></div></div>';
+  }).join('');
+
+  const planNote = planComplete
+    ? ''
+    : '<div style="background:#ebf4ff;border:1px solid #bee3f8;border-radius:6px;padding:8px 12px;margin-bottom:14px;font-size:0.78rem;color:#2b6cb0">ℹ️ All requirements below apply to the <strong>full 4-semester program</strong>. You have courses in ' + semsWithCourses.length + '/4 semesters — shortfalls will only be flagged once all semesters are planned.</div>';
+
+  const checksHtml = planNote + checks.map(c => {
+    const bg = c.ok ? '#f0fff4' : c.warn ? '#fffbeb' : '#f7fafc';
+    const icon = c.ok ? '✅' : c.warn ? '⚠️' : '🔲';
+    const valColor = c.ok ? '#276749' : c.warn ? '#7b341e' : '#718096';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;margin-bottom:6px;background:' + bg + '">' +
+    '<span style="font-size:1rem;flex-shrink:0">' + icon + '</span>' +
+    '<span style="flex:1;font-size:0.82rem;color:#2d3748">' + c.label + '</span>' +
+    '<span style="font-size:0.8rem;font-weight:700;color:' + valColor + ';white-space:nowrap">' + c.val + '</span></div>';
+  }).join('');
+
+  const now = new Date().toLocaleDateString('en-CH', {day:'numeric',month:'long',year:'numeric'});
+
+  const semSections = [1,2,3,4].map(s => {
+    if (!bySem[s].length) return '';
+    const semCp = bySem[s].reduce((a,c)=>a+c.cp,0);
+    return '<h2>' + semNames[s] + ' — ' + semCp + ' CP</h2>' + semTable(s);
+  }).join('');
+
+  const allRows = selected.slice().sort((a,b)=>a.sems[0]-b.sems[0]).map(c => {
+    const det = COURSE_DETAILS[c.id]||{};
+    const semLabel = c.sems.map(s=>({1:'S1',2:'S2',3:'S3',4:'S4'})[s]).join(', ');
+    const catLabel = {core:'Core',skill:'Skill',maselec:'MAS Elec.',furtherelec:'Further Elec.'}[c.cat]||c.cat;
+    return '<tr><td style="font-weight:600">' + c.name + '</td><td style="color:#718096">' + c.id + '</td><td style="text-align:center">' + c.cp + '</td><td style="text-align:center">' + semLabel + '</td><td>' + catLabel + '</td><td style="font-size:0.72rem">' + (det.schedule||'—') + '</td><td style="font-size:0.72rem">' + (det.exam||'—') + '</td></tr>';
+  }).join('');
+
+  const css = '*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1a202c;background:white;font-size:13px;padding:32px 40px;max-width:960px;margin:0 auto}h1{font-size:1.6rem;font-weight:800;color:#1a365d;margin-bottom:4px}.subtitle{font-size:0.85rem;color:#718096;margin-bottom:28px}h2{font-size:1rem;font-weight:700;color:#2d3748;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:0.78rem}th{background:#f7fafc;text-align:left;padding:7px 10px;border-bottom:2px solid #e2e8f0;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.04em;color:#718096;white-space:nowrap}td{padding:7px 10px;border-bottom:1px solid #f0f4f8;vertical-align:top}tfoot td{background:#f7fafc;border-top:2px solid #e2e8f0;border-bottom:none}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.sum-box{background:#f7fafc;border-radius:8px;padding:14px;text-align:center;border:1px solid #e2e8f0}.sum-big{font-size:2rem;font-weight:800;color:#2b6cb0;line-height:1}.sum-label{font-size:0.72rem;color:#718096;margin-top:3px;line-height:1.3}.status-banner{padding:10px 16px;border-radius:8px;font-size:0.85rem;font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:8px}.ok{background:#f0fff4;color:#276749;border:1px solid #c6f6d5}.warn{background:#fffbeb;color:#7b341e;border:1px solid #fbd38d}@media print{body{padding:16px 20px}.no-print{display:none}}';
+
+  const html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>MAS MTEC Course Plan – ' + now + '</title><style>' + css + '</style></head><body>' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div><h1>MAS MTEC Course Plan</h1><div class="subtitle">Exported ' + now + ' · Class of 2026–2028 · ETH Zurich</div></div>' +
+    '<button class="no-print" onclick="window.print()" style="padding:8px 16px;background:#2b6cb0;color:white;border:none;border-radius:6px;font-size:0.82rem;font-weight:600;cursor:pointer">Print / Save PDF</button></div>' +
+    '<div class="' + (allOk ? 'ok' : anyWarn ? 'warn' : 'info') + ' status-banner" style="' + ((!allOk && !anyWarn) ? 'background:#ebf4ff;color:#2b6cb0;border:1px solid #bee3f8;' : '') + '"><span>' + (allOk ? '✅' : anyWarn ? '⚠️' : 'ℹ️') + '</span><span>' + (allOk ? 'All graduation requirements met.' : anyWarn ? 'Some requirements not met — see checklist below.' : 'Plan in progress — add courses for all 4 semesters to check requirements.') + '</span></div>' +
+    '<div class="summary-grid">' +
+      '<div class="sum-box"><div class="sum-big" style="color:' + (total>=60 ? '#276749' : planComplete ? '#c05621' : '#2b6cb0') + '">' + total + '</div><div class="sum-label">Total CP selected (need ≥ 60)</div></div>' +
+      '<div class="sum-box"><div class="sum-big" style="color:' + (catCP.core>=15 ? '#276749' : planComplete ? '#c05621' : '#2b6cb0') + '">' + catCP.core + '</div><div class="sum-label">Core CP (need ≥ 15)</div></div>' +
+      '<div class="sum-box"><div class="sum-big" style="color:' + (areasMetCount>=5 ? '#276749' : planComplete ? '#c05621' : '#2b6cb0') + '">' + areasMetCount + '/6</div><div class="sum-label">Competence areas ≥ 3 CP (need 5)</div></div>' +
+      '<div class="sum-box"><div class="sum-big" style="color:' + (catCounts.skill>=2 ? '#276749' : '#2b6cb0') + '">' + catCounts.skill + '</div><div class="sum-label">Skill courses (need ≥ 2)</div></div>' +
+    '</div>' +
+    '<h2>Requirements Checklist</h2>' + checksHtml +
+    '<h2>Competence Area Coverage</h2>' + areaBars +
+    semSections +
+    '<h2>All Selected Courses (' + selected.length + ' courses · ' + total + ' CP)</h2>' +
+    '<table><thead><tr><th>Course</th><th>ID</th><th>CP</th><th>Semester(s)</th><th>Category</th><th>Schedule</th><th>Exam</th></tr></thead><tbody>' + allRows + '</tbody></table>' +
+    '<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:0.72rem;color:#a0aec0;text-align:center">Generated from MAS MTEC Course Planner · Schedule data from ETH VVZ (HS2026) · Requirements per MAS MTEC Study Plan 2026–2028</div>' +
+    '</body></html>';
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

@@ -320,7 +320,9 @@ const COURSES = [
   {id:'363-0393-00', name:'Corporate Strategy', cat:'furtherelec', area:null, sems:[3], cp:3, block:true, blockSlot:null, prereqs:false, masOnly:false, lecturer:"S. Ben-Menahem"},
   {id:'363-1153-00', name:'Decentralized Finance', cat:'furtherelec', area:null, sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"B. J. Bergmann, H. Gersbach, S. Zelzner"},
   {id:'363-1082-00', name:'Enabling Entrepreneurship: From Science to Startup', cat:'furtherelec', area:null, sems:[1,3], cp:3, block:false, blockSlot:null, prereqs:true, masOnly:false, lecturer:"R. De Cock"},
-  {id:'363-1028-00', name:'Entrepreneurial Leadership', cat:'furtherelec', area:null, sems:[1,3], cp:4, block:true, blockSlot:null, prereqs:true, masOnly:false, lecturer:"Z. Erden Özkol, S. Brusoni, O. von Dzengelevski, G. von Krogh"},
+  {id:'363-1028-00', name:'Innovation Leadership Seminar (ILS)', cat:'furtherelec', area:null, sems:[1,3], cp:4, block:true, blockSlot:null, prereqs:true, masOnly:false, lecturer:"Z. Erden Özkol, S. Brusoni, O. von Dzengelevski, G. von Krogh"},
+  {id:'363-1209-00', name:'Building Agentic AI Systems for Industry Transformation', cat:'furtherelec', area:null, sems:[1,3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"K. O'Sullivan, R. Jakob, M. Kreft"},
+  {id:'363-1208-00', name:'Strategic Management of Intellectual Property', cat:'furtherelec', area:null, sems:[1,3], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"M.E.Y. Cerpentier, C. Liu, B. Weibel"},
   {id:'363-1077-00', name:'Entrepreneurship', cat:'furtherelec', area:null, sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"B. Clarysse"},
   {id:'363-0448-00', name:'Global Operations Strategy', cat:'furtherelec', area:null, sems:[2], cp:3, block:false, blockSlot:null, prereqs:false, masOnly:false, lecturer:"O. von Dzengelevski"},
   {id:'363-0792-00', name:'Knowledge Management', cat:'furtherelec', area:null, sems:[2], cp:1, block:true, blockSlot:null, prereqs:false, masOnly:false, lecturer:"P. Wolf"},
@@ -388,7 +390,7 @@ const COURSE_DETAILS = {
   '363-0393-00':{abstract:"Corporate strategy: how firms create and sustain competitive advantage at the multi-business level.",schedule:'19–21 Oct · 09:15–17:00, HG F 26.3',exam:"End-of-semester examination",recorded:null},
   '363-1153-00':{abstract:"Decentralized finance (DeFi): blockchain, smart contracts, tokenization, and the future of financial systems.",schedule:null,exam:"End-of-semester examination",recorded:null},
   '363-1082-00':{abstract:"Enabling entrepreneurship from science to startup: technology transfer, spin-off creation, and venture development.",schedule:'07 Oct, 14–28 Oct (bi-weekly online) · 09 Dec · HG F 26.1',exam:"End-of-semester examination",recorded:null},
-  '363-1028-00':{abstract:"Entrepreneurial leadership: leading ventures through growth, building entrepreneurial teams and scaling organizations.",schedule:null,exam:"Graded semester performance",recorded:null},
+  '363-1028-00':{abstract:"The ILS brings together MAS MTEC students and leading researchers to tackle real innovation and strategy challenges. Hands-on, team-based seminar with ETH faculty.",schedule:null,exam:"Graded semester performance",recorded:null},
   '363-1077-00':{abstract:"Entrepreneurship: creating new ventures, business models, opportunity recognition, and entrepreneurial ecosystems.",schedule:null,exam:"End-of-semester examination",recorded:null},
   '363-0448-00':{abstract:"Global operations strategy: designing global supply networks, offshoring decisions, and operations in emerging markets.",schedule:null,exam:"End-of-semester examination",recorded:null},
   '363-0792-00':{abstract:"Knowledge management: how organizations create, share, and leverage knowledge for competitive advantage.",schedule:null,exam:"Ungraded semester performance",recorded:null},
@@ -396,6 +398,8 @@ const COURSE_DETAILS = {
   '363-1060-00':{abstract:"Strategies for sustainable business: integrating environmental and social sustainability into business strategy.",schedule:null,exam:"End-of-semester examination",recorded:null},
   '363-0389-00':{abstract:"Technology and innovation management: frameworks for managing technological change, R&D, and innovation strategy.",schedule:null,exam:"End-of-semester examination",recorded:null},
   '363-0790-00':{abstract:"Technology entrepreneurship: commercializing technology, IP strategy, and building tech ventures.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-1209-00':{abstract:"How to build and deploy agentic AI systems that transform industries — covering LLMs, autonomous agents, multi-agent pipelines, and responsible deployment at scale.",schedule:null,exam:"End-of-semester examination",recorded:null},
+  '363-1208-00':{abstract:"Strategic management of intellectual property: patents, trade secrets, licensing, and IP strategy for technology-driven firms.",schedule:null,exam:"End-of-semester examination",recorded:null},
 };
 
 // ─── STATE ──────────────────────────────────────────────────────────────────
@@ -474,7 +478,9 @@ const VID_MAP = {
   '363-1077-00': 198944,
   '363-0448-00': 198712,
   '363-0792-00': 197678,
-  '363-1060-00': 199091
+  '363-1060-00': 199091,
+  '363-1209-00': 205978,
+  '363-1208-00': 205900,
 };
 
 const SEMKEZ_OVERRIDE = {
@@ -897,7 +903,7 @@ function exportPlan() {
   win.document.close();
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────
 render();
 </script>
 </body>
